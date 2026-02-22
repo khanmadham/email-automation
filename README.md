@@ -1,128 +1,67 @@
-# Email Automation System
+# AI Email Automation System
 
-A Node.js application that automatically analyzes and replies to emails with personalized messages using Gmail API and OpenAI.
+Production-ready email automation system built with Node.js, Gmail API, and OpenAI.  
+This system automatically reads incoming emails, filters them based on rules, and generates intelligent responses.
 
-## Features
+---
 
-- **Automated Email Monitoring**: Continuously monitors Gmail inbox for new unread emails
-- **Intelligent Filtering**: Custom rule-based filtering to determine which emails to reply to
-- **AI-Powered Responses**: Generates personalized responses using OpenAI's language models
-- **Personalization**: Addresses senders by name and includes company information
-- **Configurable Rules**: JSON-based rule system supporting keyword matching and custom conditions
-- **Scheduled Processing**: Cron-based scheduling with configurable intervals
-- **Comprehensive Logging**: Winston-based logging for debugging and monitoring
-- **Secure Authentication**: OAuth 2.0 for Gmail with token management
+## Key Features
 
-## Prerequisites
+- Gmail OAuth2 integration
+- AI-generated email responses using OpenAI
+- Rule-based filtering engine
+- Automated scheduling using cron jobs
+- Configurable automation rules
+- Production-ready modular architecture
 
-- Node.js (v16 or higher)
-- Gmail account with API access
-- OpenAI API key
-- Google Cloud Project with Gmail API enabled
+---
 
-## Setup Instructions
+## Architecture
 
-### 1. Clone and Install Dependencies
+Pipeline flow:
 
-```bash
-cd email-automation
-npm install
-```
+1. Gmail API fetches unread emails
+2. Filter engine evaluates rules
+3. AI generates response
+4. Response is sent automatically
+5. Email is marked as processed
 
-### 2. Set Up Gmail API Credentials
+---
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project
-3. Enable the Gmail API
-4. Create OAuth 2.0 credentials (Desktop application):
-   - Click "Create Credentials" → "OAuth 2.0 Client ID"
-   - Select "Desktop application"
-   - Download the credentials JSON
-5. Copy the Client ID and Client Secret
+## Tech Stack
 
-### 3. Configure Environment Variables
+- Node.js
+- Gmail API
+- OpenAI API
+- Cron Scheduler
+- JavaScript
 
-Create a `.env` file based on `.env.example`:
+---
 
-```bash
-cp .env.example .env
-```
+## Use Cases
 
-Edit `.env` and add your credentials:
+- Customer support automation
+- Lead response automation
+- Business email automation
+- CRM integration pipelines
 
-```env
-# Gmail OAuth
-GMAIL_CLIENT_ID=your_client_id_here
-GMAIL_CLIENT_SECRET=your_client_secret_here
-GMAIL_REDIRECT_URI=http://localhost:3000/oauth/callback
+---
 
-# OpenAI API
-OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-4o-mini
+## Project Structure
 
-# Processing Settings
-PROCESSING_INTERVAL_MINUTES=5
-MARK_AS_READ_AFTER_REPLY=true
-LOG_LEVEL=info
-```
+---
 
-### 4. Authenticate with Gmail
+## Security
 
-Run the setup script to authenticate:
+Sensitive files like credentials and API keys are excluded using .gitignore.
 
-```bash
-npm run setup
-```
+---
 
-This will:
-1. Generate an authentication URL
-2. Open your browser (or display the URL)
-3. Ask you to authorize the application
-4. Save the OAuth tokens locally
+## Author
 
-### 5. Configure Filtering Rules
-
-Edit `config/rules.json` to customize which emails get auto-replies:
-
-```json
-{
-  "rules": [
-    {
-      "id": "support_inquiries",
-      "name": "Support Inquiry Auto-Reply",
-      "enabled": true,
-      "conditions": {
-        "keywords": ["help", "support", "issue"],
-        "mustMatch": "any"
-      },
-      "context": "This is a customer support inquiry"
-    }
-  ]
-}
-```
-
-**Rule Configuration**:
-- `id`: Unique identifier
-- `name`: Human-readable name
-- `enabled`: Toggle rule on/off
-- `conditions.keywords`: Array of keywords to match
-- `conditions.mustMatch`: "any" (match at least one) or "all" (match all)
-- `context`: Description passed to AI for personalization
-
-## Running the Application
-
-### Start the Email Automation
-
-```bash
-npm start
-```
-
-### Development Mode (with auto-reload)
-
-```bash
-npm run dev
-```
-
+Hammad Khan  
+Automation Engineer  
+GitHub: https://github.com/khanmadham
 The application will:
 1. Initialize the Gmail service
 2. Start the scheduler
