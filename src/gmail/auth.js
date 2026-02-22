@@ -1,30 +1,15 @@
 import { google } from 'googleapis';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import readline from 'readline';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const TOKEN_PATH = path.join(__dirname, '../../credentials.json');
+// Load credentials from environment variables
+const clientId = process.env.GMAIL_CLIENT_ID;
+const clientSecret = process.env.GMAIL_CLIENT_SECRET;
+const redirectUri = process.env.GMAIL_REDIRECT_URI || 'http://localhost:3000/oauth/callback';
 
-// Try to load from downloaded JSON file, fallback to environment variables
-let clientId, clientSecret, redirectUri;
-
-// Look for the downloaded credentials file
-const credentialsPath = path.join(__dirname, '../../client_secret_*.json');
-const credentialsDir = path.join(__dirname, '../../');
-const files = fs.readdirSync(credentialsDir).filter(f => f.startsWith('client_secret_') && f.endsWith('.json'));
-
-if (files.length > 0) {
-  const credFile = JSON.parse(fs.readFileSync(path.join(credentialsDir, files[0]), 'utf-8'));
-  clientId = credFile.web.client_id;
-  clientSecret = credFile.web.client_secret;
-  redirectUri = credFile.web.redirect_uris[0];
-} else {
-  clientId = process.env.GMAIL_CLIENT_ID;
-  clientSecret = process.env.GMAIL_CLIENT_SECRET;
-  redirectUri = process.env.GMAIL_REDIRECT_URI || 'http://localhost:3000/oauth/callback';
+if (!clientId || !clientSecret) {
+  throw new Error(
+    'Missing required environment variables: GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET'
+  );
 }
 
 const oauth2Client = new google.auth.OAuth2(
@@ -39,15 +24,18 @@ const oauth2Client = new google.auth.OAuth2(
 export async function getAuthenticatedClient() {
   let credentials;
 
-  if (fs.existsSync(TOKEN_PATH)) {
-    const savedCredentials = JSON.parse(fs.readFileSync(TOKEN_PATH, 'utf-8'));
+  if (process.env.GOOGLE_TOKEN_JSON) {
+    const savedCredentials = JSON.parse(process.env.GOOGLE_TOKEN_JSON);
     oauth2Client.setCredentials(savedCredentials);
 
     // Refresh token if expired
     if (oauth2Client.isTokenExpiring()) {
       const { credentials: refreshedCredentials } = await oauth2Client.refreshAccessToken();
       oauth2Client.setCredentials(refreshedCredentials);
-      fs.writeFileSync(TOKEN_PATH, JSON.stringify(refreshedCredentials));
+      
+      // Update the environment variable with new token
+      // Note: In production, store this securely (database, secure keystore, etc.)
+      process.env.GOOGLE_TOKEN_JSON = JSON.stringify(refreshedCredentials);
     }
 
     return oauth2Client;
@@ -80,9 +68,15 @@ export async function initializeOAuth() {
 
       const { tokens } = await oauth2Client.getToken(code);
       oauth2Client.setCredentials(tokens);
-      fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens));
 
-      console.log('Credentials saved to', TOKEN_PATH);
+      // Display the token JSON for the user to add to .env
+      const tokenJson = JSON.stringify(tokens);
+      console.log('\n✅ Authentication successful!');
+      console.log('Add this to your .env file:');
+      console.log(`GOOGLE_TOKEN_JSON='${tokenJson}'`);
+      console.log('\nOr set it as an environment variable:');
+      console.log(`export GOOGLE_TOKEN_JSON='${tokenJson}'`);
+
       resolve(oauth2Client);
     });
   });
