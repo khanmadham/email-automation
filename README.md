@@ -1,6 +1,6 @@
 # AI Email Automation System
 
-Production-ready email automation system built with Node.js, Gmail API, and OpenAI.  
+Production-ready email automation system built with Node.js, Gmail API, and Claude.  
 This system automatically reads incoming emails, filters them based on rules, and generates intelligent responses.
 
 ---
